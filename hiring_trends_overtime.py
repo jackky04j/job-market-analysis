@@ -8,7 +8,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 
-linkedin_recent = pd.read_csv("linkedin_no_skills_cleaned.csv")
+linkedin_recent = pd.read_csv("job-market-analysis/linkedin_no_skills_cleaned.csv")
 
 # Convert date to datetime format
 linkedin_recent['datePosted'] = pd.to_datetime(linkedin_recent['datePosted'])

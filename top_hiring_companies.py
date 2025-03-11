@@ -5,9 +5,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # Step 1: Load all three datasets
-indeed_data = pd.read_csv("indeed_webscrape.csv")
-linkedin_historical_data = pd.read_csv("linkedin_historical.csv")
-linkedin_no_skills_data = pd.read_csv("linkedin_no_skills.csv")
+indeed_data = pd.read_csv("job-market-analysis/indeed_webscrape.csv")
+linkedin_historical_data = pd.read_csv("job-market-analysis/linkedin_historical.csv")
+linkedin_no_skills_data = pd.read_csv("job-market-analysis/linkedin_no_skills.csv")
 
 # Step 2: Extract company names from each dataset
 indeed_companies = indeed_data['company']  # Extract from Indeed

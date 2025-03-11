@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 from statsmodels.tsa.arima.model import ARIMA
 
 # Load your LinkedIn data
-linkedin_recent = pd.read_csv("linkedin_no_skills_cleaned.csv")
+linkedin_recent = pd.read_csv("job-market-analysis/linkedin_no_skills_cleaned.csv")
 
 # Convert datePosted to datetime
 linkedin_recent['datePosted'] = pd.to_datetime(linkedin_recent['datePosted'])
@@ -59,4 +59,4 @@ plt.legend()
 plt.show()
 
 # Save predictions to CSV
-forecast_df.to_csv("arima_job_postings.csv", index=False)
+forecast_df.to_csv("job-market-analysis/arima_job_postings.csv", index=False)

@@ -11,7 +11,7 @@ import pandas as pd
 import json
 
 # Load CSV file
-df = pd.read_csv("linkedin_no_skills.csv")
+df = pd.read_csv("job-market-analysis/linkedin_no_skills.csv")
 
 # Function to extract 'datePosted' from the 'content' column
 def extract_date(json_str):
@@ -31,6 +31,6 @@ df = df.dropna(subset=["datePosted"])
 df = df.drop_duplicates()
 
 # Save cleaned data to a new CSV
-df.to_csv("linkedin_no_skills_cleaned.csv", index=False)
+df.to_csv("job-market-analysis/linkedin_no_skills_cleaned.csv", index=False)
 
 print("Data cleaned and saved as 'linkedin_no_skills_cleaned.csv'")

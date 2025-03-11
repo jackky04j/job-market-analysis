@@ -1,29 +1,27 @@
-# Cleans the data and provides the Top 10 Skills for each dataset
-
-# Uses: indeed_webscrape.csv and linkedin_historical.csv
-# Produces: cleaned_indeed_data and cleaned_linkedin_data.csv
-
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 import matplotlib.pyplot as plt
 
 # Step 1: Load the CSV files into pandas DataFrames
-indeed_data = pd.read_csv('indeed_webscrape.csv')
-linkedin_data = pd.read_csv("linkedin_historical.csv")
+indeed_data = pd.read_csv('job-market-analysis/indeed_webscrape.csv')
+linkedin_data = pd.read_csv("job-market-analysis/linkedin_historical.csv")
 
 # Step 2: Clean and preprocess Indeed data
-# Remove any rows where 'skills' column is NaN
-# Replace NaNs with empty strings for skills
-indeed_data['skills'] = indeed_data['skills'].fillna('')  
+# Remove any rows where 'skills' column is NaN or blank
+indeed_data['skills'] = indeed_data['skills'].fillna('')  # Fill NaN values with empty string
+indeed_data = indeed_data[indeed_data['skills'].str.strip() != '']  # Remove rows with blank skills
 
 # Group Indeed data by 'job_title-href' and aggregate other columns
 indeed_data_cleaned = indeed_data.groupby(['job_title-href'], as_index=False).agg({
-    'job_title': 'first',
-    'location': 'first',
-    'company': 'first',
-    # Combine unique skills
+    'job_title': 'first',  # Keep the first occurrence of job_title for each 'job_title-href'
+    'location': 'first',   # Keep the first occurrence of location for each 'job_title-href'
+    'company': 'first',    # Keep the first occurrence of company for each 'job_title-href'
+    # Combine unique skills into a comma-separated list
     'skills': lambda x: ', '.join(x.dropna().unique())  
 })
+
+# Save cleaned Indeed data to CSV
+indeed_data_cleaned.to_csv("job-market-analysis/indeed_webscrape_cleaned.csv", index=False)
 
 # Step 3: Clean and preprocess LinkedIn data
 linkedin_data = linkedin_data.drop_duplicates()  # Remove duplicate rows
@@ -35,7 +33,6 @@ linkedin_data = linkedin_data.dropna(subset=['job_title', 'company', 'job_skills
 # Initialize TF-IDF Vectorizer
 # TF-IDF is a technique used in NLP to convert textual data 
 # into numerical form for machine learning models
-
 
 # The TfidfVectorizer is initialized with stop_words='english' 
 # and max_features=10 to focus on the most important words
@@ -81,7 +78,7 @@ plt.ylabel('Skills')
 plt.gca().invert_yaxis()  # To have the highest value at the top
 plt.show()
 
+# Save cleaned LinkedIn data to CSV
+linkedin_data.to_csv("job-market-analysis/linkedin_historical_cleaned.csv", index=False)
 
-# Save cleaned data to CSV files
-indeed_data.to_csv("indeed_webscrape_cleaned.csv", index=False)
-linkedin_data.to_csv("linkedin_historical_cleaned.csv", index=False)
+print("Data cleaning and analysis completed! Results saved as CSV files.")
