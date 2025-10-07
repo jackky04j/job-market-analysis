@@ -2,10 +2,8 @@ import streamlit as st
 import subprocess
 import importlib.util
 import sys
-import os
 from pathlib import Path
 import pandas as pd
-import glob
 
 # ================================
 # 📌 CONFIGURATION
@@ -13,10 +11,11 @@ import glob
 REPO_ROOT = Path(__file__).parent
 GRAPHS_DIR = REPO_ROOT / "graphs"
 
+# ✅ Use the CLEANED CSV files here
 CSV_FILES = {
-    "LinkedIn Historical": REPO_ROOT / "linkedin_historical.csv",
-    "Indeed Webscrape": REPO_ROOT / "indeed_webscrape.csv",
-    "LinkedIn No Skills": REPO_ROOT / "linkedin_no_skills.csv",
+    "Clean LinkedIn Historical": REPO_ROOT / "clean_linkedin_historical.csv",
+    "Clean Indeed Webscrape": REPO_ROOT / "clean_indeed_webscrape.csv",
+    "Clean LinkedIn No Skills": REPO_ROOT / "clean_linkedin_no_skills.csv",
 }
 
 SCRIPTS = [
@@ -39,8 +38,8 @@ def run_script(script_name: str):
     if not path.exists():
         return False, f"❌ Script not found: {path.name}"
 
-    # Try import & call main()
     try:
+        # Try importing and running main()
         spec = importlib.util.spec_from_file_location(script_name, str(path))
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
@@ -48,9 +47,9 @@ def run_script(script_name: str):
             module.main()
             return True, f"✅ Successfully imported and ran {script_name}.main()"
         else:
-            # fallback to subprocess if no main
             raise AttributeError("No main() found")
-    except Exception as e:
+    except Exception:
+        # Fallback: run as subprocess
         try:
             result = subprocess.run([sys.executable, str(path)], capture_output=True, text=True)
             if result.returncode == 0:
@@ -89,7 +88,7 @@ with col1:
 
 with col2:
     st.markdown("<h1 style='margin-bottom:0'>Job Market Analysis Dashboard</h1>", unsafe_allow_html=True)
-    st.markdown("<p style='color:gray'>Run scripts • Explore CSVs • View generated graphs — all locally</p>", unsafe_allow_html=True)
+    st.markdown("<p style='color:gray'>Using cleaned datasets • Run scripts • Explore data • View generated graphs — all locally</p>", unsafe_allow_html=True)
 
 st.write("---")
 
@@ -110,7 +109,7 @@ if st.sidebar.button("▶ Run Selected"):
             st.sidebar.error(msg)
 
 st.sidebar.markdown("---")
-st.sidebar.header("📊 CSV Files")
+st.sidebar.header("📊 CSV Files (Cleaned)")
 
 for name, path in CSV_FILES.items():
     if path.exists():
@@ -126,7 +125,7 @@ tab1, tab2, tab3 = st.tabs(["📑 Data Explorer", "🖼️ Graphs", "📝 Script
 
 # --- Tab 1: Data Explorer ---
 with tab1:
-    st.subheader("📂 Explore CSV Data")
+    st.subheader("📂 Explore Cleaned CSV Data")
     for label, path in CSV_FILES.items():
         st.markdown(f"### {label}")
         if path.exists():
@@ -156,4 +155,4 @@ with tab3:
 # 🦸 FOOTER
 # ================================
 st.write("---")
-st.caption("🕷️ Local Job Market Analysis Dashboard — powered by Streamlit. Drop your 'spiderman_logo.png' in the repo folder for custom branding.")
+st.caption("🕷️ Local Job Market Analysis Dashboard — using cleaned datasets. Drop your 'spiderman_logo.png' in the repo folder for custom branding.")
