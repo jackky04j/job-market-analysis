@@ -4,6 +4,13 @@ import importlib.util
 import sys
 from pathlib import Path
 import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.metrics import (
+    accuracy_score, precision_score, recall_score, f1_score,
+    mean_squared_error, r2_score
+)
 
 # ================================
 # 📌 CONFIGURATION
@@ -39,7 +46,6 @@ def run_script(script_name: str):
         return False, f"❌ Script not found: {path.name}"
 
     try:
-        # Try importing and running main()
         spec = importlib.util.spec_from_file_location(script_name, str(path))
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
@@ -49,7 +55,6 @@ def run_script(script_name: str):
         else:
             raise AttributeError("No main() found")
     except Exception:
-        # Fallback: run as subprocess
         try:
             result = subprocess.run([sys.executable, str(path)], capture_output=True, text=True)
             if result.returncode == 0:
@@ -88,7 +93,7 @@ with col1:
 
 with col2:
     st.markdown("<h1 style='margin-bottom:0'>Job Market Analysis Dashboard</h1>", unsafe_allow_html=True)
-    st.markdown("<p style='color:gray'>Using cleaned datasets • Run scripts • Explore data • View generated graphs — all locally</p>", unsafe_allow_html=True)
+    st.markdown("<p style='color:gray'>Using cleaned datasets • Run scripts • Explore data • Evaluate metrics — all locally</p>", unsafe_allow_html=True)
 
 st.write("---")
 
@@ -121,7 +126,12 @@ for name, path in CSV_FILES.items():
 # ================================
 # 📈 MAIN CONTENT
 # ================================
-tab1, tab2, tab3 = st.tabs(["📑 Data Explorer", "🖼️ Graphs", "📝 Script Outputs"])
+tab1, tab2, tab3, tab4 = st.tabs([
+    "📑 Data Explorer",
+    "🖼️ Graphs",
+    "📝 Script Outputs",
+    "📏 Evaluation & Metrics"
+])
 
 # --- Tab 1: Data Explorer ---
 with tab1:
@@ -151,8 +161,66 @@ with tab3:
     st.subheader("📜 Log & Run Feedback")
     st.write("Script run results appear in the sidebar when you execute them.")
 
+# --- Tab 4: Evaluation & Metrics ---
+with tab4:
+    st.subheader("📏 Evaluation & Metrics")
+
+    dataset_choice = st.selectbox("Select dataset for evaluation", list(CSV_FILES.keys()))
+    data_path = CSV_FILES[dataset_choice]
+
+    if data_path.exists():
+        df_eval = pd.read_csv(data_path)
+        st.write(f"Dataset shape: {df_eval.shape}")
+        
+        # 🧠 Basic Evaluation
+        st.markdown("### 🔸 Basic Statistics")
+        st.write(df_eval.describe(include='all').transpose())
+
+        st.markdown("### 🔸 Missing Values")
+        st.write(df_eval.isnull().sum())
+
+        # 📊 Correlation Heatmap
+        if not df_eval.select_dtypes(include=[np.number]).empty:
+            st.markdown("### 🔸 Correlation Heatmap")
+            fig, ax = plt.subplots(figsize=(10, 6))
+            sns.heatmap(df_eval.select_dtypes(include=[np.number]).corr(), annot=True, cmap="coolwarm", ax=ax)
+            st.pyplot(fig)
+
+        # 📈 Distribution Plots
+        numeric_cols = df_eval.select_dtypes(include=[np.number]).columns.tolist()
+        if numeric_cols:
+            st.markdown("### 🔸 Column Distribution")
+            col_to_plot = st.selectbox("Select numeric column to view distribution", numeric_cols)
+            fig, ax = plt.subplots(figsize=(8, 4))
+            sns.histplot(df_eval[col_to_plot], kde=True, ax=ax)
+            st.pyplot(fig)
+
+        # 🧪 Metrics Demo (if applicable)
+        st.markdown("### 🧮 Model Metric Demonstration")
+        st.info("Demo using random y_true / y_pred — Replace with actual model results when available.")
+        y_true = np.random.randint(0, 2, size=100)
+        y_pred = np.random.randint(0, 2, size=100)
+
+        st.write({
+            "Accuracy": accuracy_score(y_true, y_pred),
+            "Precision": precision_score(y_true, y_pred, zero_division=0),
+            "Recall": recall_score(y_true, y_pred, zero_division=0),
+            "F1 Score": f1_score(y_true, y_pred, zero_division=0)
+        })
+
+        # Regression metrics demo
+        y_true_reg = np.random.rand(100)
+        y_pred_reg = y_true_reg + np.random.normal(0, 0.1, size=100)
+        st.write({
+            "MSE": mean_squared_error(y_true_reg, y_pred_reg),
+            "R² Score": r2_score(y_true_reg, y_pred_reg)
+        })
+
+    else:
+        st.warning(f"{data_path.name} not found")
+
 # ================================
 # 🦸 FOOTER
 # ================================
 st.write("---")
-st.caption("🕷️ Local Job Market Analysis Dashboard — using cleaned datasets. Drop your 'spiderman_logo.png' in the repo folder for custom branding.")
+st.caption("🕷️ Local Job Market Analysis Dashboard — Evaluation integrated • Clean datasets • Run locally")
